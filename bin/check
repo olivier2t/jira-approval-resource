@@ -46,25 +46,26 @@ if [ -z "$check_issue_key" ]; then
   jq '.version // {}' /tmp/input >&2
   exit 1
 fi
-jira_issue_key = $(echo $check_issue_key | cut -d ":" -f 1)
+# jira_issue_key = $(echo $check_issue_key | cut -d ":" -f 1)
 
-if [ $(echo $check_issue_key | grep -i approved | wc -l) -gt 0 ]; then
-  echo "JIRA request was already approved. Ignoring..." >&2
-  echo '[ { "issueKey": "${check_issue_key}" } ]' >&3
-  exit 0
-fi
+# if [ $(echo $check_issue_key | grep -i approved | wc -l) -gt 0 ]; then
+#   echo "JIRA request was already approved. Ignoring..." >&2
+#   echo '[ { "issueKey": "${check_issue_key}" } ]' >&3
+#   exit 0
+# fi
 
 current_request = $(curl -u ${jira_user_email}:${jira_user_token} \
   -H 'Accept: application/json' \
   -X GET \
-  --url https://${jira_account}.atlassian.net/rest/servicedeskapi/request/${jira_issue_key})
+  --url https://${jira_account}.atlassian.net/rest/servicedeskapi/request/${check_issue_key})
   
 currentStatus = $(echo $current_request | jq '.currentStatus.status')
 
 if [ $(echo $currentStatus | grep -i approved | wc -l) -gt 0 ]; then
-  echo "JIRA request has just been approved !" >&2
-  echo '[ { "issueKey": "${check_issue_key}" }, { "issueKey": "${check_issue_key}:${currentStatus}" } ]' >&3
+  echo "JIRA request has been approved !" >&2
+#  echo '[ { "issueKey": "${check_issue_key}" }, { "issueKey": "${check_issue_key}:${currentStatus}" } ]' >&3
+  echo '[ { "issueKey": "${check_issue_key}" } ]' >&3
   exit 0
 fi
 
-echo '[ { "issueKey": "${check_issue_key}" } ]' >&3
+echo '[]' >&3
