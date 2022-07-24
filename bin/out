@@ -73,7 +73,7 @@ echo "Using JIRA request summary: $summary"
 
 description=$(jq -r '.params.description // empty' /tmp/input)
 
-current_request = $(curl -u ${jira_user_email}:${jira_user_token} \
+response=$(curl -u ${jira_user_email}:${jira_user_token} \
   -H 'Accept: application/json' \
   -H 'Content-Type: application/json' \
   -X POST \
@@ -86,9 +86,10 @@ current_request = $(curl -u ${jira_user_email}:${jira_user_token} \
         }
       }' \
   --url https://${jira_account}.atlassian.net/rest/servicedeskapi/request)
-  
-issueKey = $(echo $current_request | jq '.issueKey')
-currentStatus = $(echo $current_request | jq '.currentStatus.status')
+echo "JIRA response: $response"
+
+issueKey = $(echo $response | jq '.issueKey')
+currentStatus = $(echo $response | jq '.currentStatus.status')
 
 echo "$issueKey" >>$SRC/requests
 
