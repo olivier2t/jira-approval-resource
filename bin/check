@@ -64,7 +64,7 @@ while read jiraIssueKey; do
 
   if [ $(echo $currentStatus | grep -i approved | wc -l) -gt 0 ]; then
     echo "JIRA issue ${jiraIssueKey} has been approved !" >&2
-    echo '{ "issueKey": "'${jiraIssueKey}'", "metadata": [ {"name": "status","value": "'${currentStatus}'"} ] }' >check
+    echo '{ "issueKey": '${jiraIssueKey}', "metadata": [ {"name": "status","value": '${currentStatus}'} ] }' >check
     exit 0
   fi
 done < jiraIssueKeys

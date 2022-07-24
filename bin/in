@@ -42,20 +42,20 @@ if [ -z "$jira_user_token" ]; then
   exit 1
 fi
 
-check_issue_key=$(jq -r '.version.issueKey // empty' /tmp/input)
-if [ -z "$check_issue_key" ]; then
+issue_key=$(jq -r '.version.issueKey // empty' /tmp/input)
+if [ -z "$issue_key" ]; then
   echo "JIRA issue key not provided:" >&2
   jq '.version // {}' /tmp/input >&2
   exit 1
 fi
-# jira_issue_key = $(echo $check_issue_key | cut -d ":" -f 1)
+# jira_issue_key = $(echo $issue_key | cut -d ":" -f 1)
 
 # TODO check if 404 before sending the result
 response=$(curl -u ${jira_user_email}:${jira_user_token} \
   -H 'Accept: application/json' \
   -X GET \
-  --url https://${jira_account}.atlassian.net/rest/servicedeskapi/request/${check_issue_key})
+  --url https://${jira_account}.atlassian.net/rest/servicedeskapi/request/${issue_key})
   
 currentStatus=$(echo ${response} | jq '.currentStatus.status')
 
-echo '{ "version": { "issueKey": "'${check_issue_key}'" }, "metadata": [ {"name": "status","value": "'${currentStatus}'"} ] }' >&3
+echo '{ "version": { "issueKey": '${issue_key}' }, "metadata": [ {"name": "status","value": '${currentStatus}'} ] }' >&3
