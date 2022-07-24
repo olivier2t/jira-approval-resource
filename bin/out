@@ -86,4 +86,4 @@ currentStatus=$(echo $response | jq '.currentStatus.status')
 
 echo "${issueKey}" >>jiraIssueKeys
 
-echo '{ "version": { "issueKey": '${issueKey}' }, "metadata": [ {"name": "status","value": '${currentStatus}'} ] }' >&3
+echo '{ "version": { "issueKey": "'${issueKey}'" }, "metadata": [ {"name": "status","value": "'${currentStatus}'"} ] }' >&3
