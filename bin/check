@@ -4,8 +4,6 @@ exec 3>&1 1>&2
 
 jq . < /dev/stdin > /tmp/input
 
-SRC=$1
-
 # Usage
 #
 # resource:
@@ -63,8 +61,7 @@ currentStatus=$(echo $current_request | jq '.currentStatus.status')
 
 if [ $(echo $currentStatus | grep -i approved | wc -l) -gt 0 ]; then
   echo "JIRA request has been approved !" >&2
-#  echo '[ { "issueKey": "${check_issue_key}" }, { "issueKey": "${check_issue_key}:${currentStatus}" } ]' >&3
-  echo '[ { "issueKey": "${check_issue_key}" } ]' >&3
+  echo '[ { "issueKey": "'"${check_issue_key}"'" } ]' >&3
   exit 0
 fi
 
