@@ -54,12 +54,12 @@ fi
 #   exit 0
 # fi
 
-current_request = $(curl -u ${jira_user_email}:${jira_user_token} \
+current_request=$(curl -u ${jira_user_email}:${jira_user_token} \
   -H 'Accept: application/json' \
   -X GET \
   --url https://${jira_account}.atlassian.net/rest/servicedeskapi/request/${check_issue_key})
   
-currentStatus = $(echo $current_request | jq '.currentStatus.status')
+currentStatus=$(echo $current_request | jq '.currentStatus.status')
 
 if [ $(echo $currentStatus | grep -i approved | wc -l) -gt 0 ]; then
   echo "JIRA request has been approved !" >&2

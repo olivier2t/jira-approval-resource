@@ -50,11 +50,11 @@ if [ -z "$check_issue_key" ]; then
 fi
 # jira_issue_key = $(echo $check_issue_key | cut -d ":" -f 1)
 
-current_request = $(curl -u ${jira_user_email}:${jira_user_token} \
+current_request=$(curl -u ${jira_user_email}:${jira_user_token} \
   -H 'Accept: application/json' \
   -X GET \
   --url https://${jira_account}.atlassian.net/rest/servicedeskapi/request/${check_issue_key})
   
-currentStatus = $(echo $current_request | jq '.currentStatus.status')
+currentStatus=$(echo $current_request | jq '.currentStatus.status')
 
 echo '{ "version": { "issueKey": "${check_issue_key}" }, "metadata": [ {"name": "status","value": "$currentStatus"} ] }' >&3
