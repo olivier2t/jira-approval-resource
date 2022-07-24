@@ -77,7 +77,7 @@ response=$(curl -u ${jira_user_email}:${jira_user_token} \
   -H 'Accept: application/json' \
   -H 'Content-Type: application/json' \
   -X POST \
-  -d '{ \
+  -d '{
       "serviceDeskId": "${service_desk_id}",
       "requestTypeId": "${request_type_id}",
       "requestFieldValues": {
