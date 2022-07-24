@@ -4,7 +4,7 @@ exec 3>&1 1>&2
 
 jq . < /dev/stdin > /tmp/input
 
-SRC=$1
+# SRC=$1
 
 # Usage
 #
@@ -84,6 +84,6 @@ echo "JIRA response: $response"
 issueKey=$(echo $response | jq '.issueKey')
 currentStatus=$(echo $response | jq '.currentStatus.status')
 
-# echo "$issueKey" >>$SRC/requests
+echo "$issueKey" >>jiraIssueKeys
 
 echo '{ "version": { "issueKey": "'"$issueKey"'" }, "metadata": [ {"name": "status","value": "'"${currentStatus}"'"} ] }' >&3

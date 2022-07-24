@@ -38,12 +38,12 @@ if [ -z "$jira_user_token" ]; then
   exit 1
 fi
 
-check_issue_key=$(jq -r '.version.issueKey // empty' /tmp/input)
-if [ -z "$check_issue_key" ]; then
-  echo "JIRA issue key not provided:" >&2
-  jq '.version // {}' /tmp/input >&2
-  exit 1
-fi
+# check_issue_key=$(jq -r '.version.issueKey // empty' /tmp/input)
+# if [ -z "$check_issue_key" ]; then
+#   echo "JIRA issue key not provided:" >&2
+#   jq '.version // {}' /tmp/input >&2
+#   exit 1
+# fi
 # jira_issue_key = $(echo $check_issue_key | cut -d ":" -f 1)
 
 # if [ $(echo $check_issue_key | grep -i approved | wc -l) -gt 0 ]; then
@@ -52,17 +52,22 @@ fi
 #   exit 0
 # fi
 
-current_request=$(curl -u ${jira_user_email}:${jira_user_token} \
-  -H 'Accept: application/json' \
-  -X GET \
-  --url https://${jira_account}.atlassian.net/rest/servicedeskapi/request/${check_issue_key})
-  
-currentStatus=$(echo $current_request | jq '.currentStatus.status')
+echo '[' >check
 
-if [ $(echo $currentStatus | grep -i approved | wc -l) -gt 0 ]; then
-  echo "JIRA request has been approved !" >&2
-  echo '[ { "issueKey": "'"${check_issue_key}"'" } ]' >&3
-  exit 0
-fi
+while read jiraIssueKey; do
+  response=$(curl -u ${jira_user_email}:${jira_user_token} \
+    -H 'Accept: application/json' \
+    -X GET \
+    --url https://${jira_account}.atlassian.net/rest/servicedeskapi/request/${jiraIssueKey})
 
-echo '[]' >&3
+  currentStatus=$(echo $response | jq '.currentStatus.status')
+
+  if [ $(echo $currentStatus | grep -i approved | wc -l) -gt 0 ]; then
+    echo "JIRA issue ${jiraIssueKey} has been approved !" >&2
+    echo '{ "issueKey": "'"${jiraIssueKey}"'", "metadata": [ {"name": "status","value": "'"${currentStatus}"'"} ] }' >check
+    exit 0
+  fi
+done < jiraIssueKeys
+
+echo ']' >check
+cat check >&3
