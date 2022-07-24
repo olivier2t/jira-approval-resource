@@ -78,11 +78,11 @@ response=$(curl -u ${jira_user_email}:${jira_user_token} \
   -H 'Content-Type: application/json' \
   -X POST \
   -d '{ \
-      "serviceDeskId": \"${service_desk_id}\", \
-      "requestTypeId": \"${request_type_id}\", \
-      "requestFieldValues": { \
-        "summary": \"${summary}\", \
-        "description": \"${description}\" \
+      \"serviceDeskId\": \"${service_desk_id}\", \
+      \"requestTypeId\": \"${request_type_id}\", \
+      \"requestFieldValues\": { \
+        \"summary\": \"${summary}\", \
+        \"description\": \"${description}\" \
         } \
       }' \
   --url https://${jira_account}.atlassian.net/rest/servicedeskapi/request)
