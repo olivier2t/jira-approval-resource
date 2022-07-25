@@ -58,4 +58,4 @@ response=$(curl -u ${jira_user_email}:${jira_user_token} \
   
 currentStatus=$(echo ${response} | jq '.currentStatus.status')
 
-echo '{ "version": { "issueKey": "'${issue_key}'" }, "metadata": [ {"name": "status","value": "'${currentStatus}'"} ] }' >&3
+jq --null-input --arg issueKey "$issueKey" --arg currentStatus "$currentStatus" '{ "version": { "issueKey": $issueKey }, "metadata": [ {"name": "status","value": $currentStatus} ] }' >&3
