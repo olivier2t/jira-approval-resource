@@ -40,26 +40,26 @@ if [ -z "$jira_user_token" ]; then
   exit 1
 fi
 
-org=$(jq -r '.params.org // empty' /tmp/input)
+org=$(jq -r '.source.org // empty' /tmp/input)
 if [ -z "$org" ]; then
   echo "Cycloid env not provided:" >&2
-  jq '.params // {}' /tmp/input >&2
+  jq '.source // {}' /tmp/input >&2
   exit 1
 fi
 echo "Using Cycloid org: $org"
 
-project=$(jq -r '.params.project // empty' /tmp/input)
+project=$(jq -r '.source.project // empty' /tmp/input)
 if [ -z "$project" ]; then
   echo "Cycloid project not provided:" >&2
-  jq '.params // {}' /tmp/input >&2
+  jq '.source // {}' /tmp/input >&2
   exit 1
 fi
 echo "Using Cycloid project: $project"
 
-env=$(jq -r '.params.env // empty' /tmp/input)
+env=$(jq -r '.source.env // empty' /tmp/input)
 if [ -z "$env" ]; then
   echo "Cycloid env not provided:" >&2
-  jq '.params // {}' /tmp/input >&2
+  jq '.source // {}' /tmp/input >&2
   exit 1
 fi
 echo "Using Cycloid env: $env"
