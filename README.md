@@ -1,2 +1,2 @@
 # jira-approval-resource
-Concourse resource creating customer requests in JIRA Service Management and managing approvals
+Concourse resource triggering jobs upon JIRA service request approvals

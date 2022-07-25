@@ -14,6 +14,8 @@ jq . < /dev/stdin > /tmp/input
 #       jira_account: cycloid-demo
 #       jira_user_email: olivier.deturckheim@cycloid.io
 #       jira_user_token: 1234567890
+# ...
+#   - get: jira-approval
 
 jira_account=$(jq -r '.source.jira_account // empty' /tmp/input)
 if [ -z "$jira_account" ]; then
@@ -38,35 +40,57 @@ if [ -z "$jira_user_token" ]; then
   exit 1
 fi
 
-# check_issue_key=$(jq -r '.version.issueKey // empty' /tmp/input)
-# if [ -z "$check_issue_key" ]; then
-#   echo "JIRA issue key not provided:" >&2
-#   jq '.version // {}' /tmp/input >&2
-#   exit 1
-# fi
-# jira_issue_key = $(echo $check_issue_key | cut -d ":" -f 1)
+org=$(jq -r '.params.org // empty' /tmp/input)
+if [ -z "$org" ]; then
+  echo "Cycloid env not provided:" >&2
+  jq '.params // {}' /tmp/input >&2
+  exit 1
+fi
+echo "Using Cycloid org: $org"
 
-# if [ $(echo $check_issue_key | grep -i approved | wc -l) -gt 0 ]; then
-#   echo "JIRA request was already approved. Ignoring..." >&2
-#   echo '[ { "issueKey": "${check_issue_key}" } ]' >&3
-#   exit 0
-# fi
+project=$(jq -r '.params.project // empty' /tmp/input)
+if [ -z "$project" ]; then
+  echo "Cycloid project not provided:" >&2
+  jq '.params // {}' /tmp/input >&2
+  exit 1
+fi
+echo "Using Cycloid project: $project"
+
+env=$(jq -r '.params.env // empty' /tmp/input)
+if [ -z "$env" ]; then
+  echo "Cycloid env not provided:" >&2
+  jq '.params // {}' /tmp/input >&2
+  exit 1
+fi
+echo "Using Cycloid env: $env"
+
+check_issue_key=$(jq -r '.version.issueKey // empty' /tmp/input | sed -e 's/"//g')
+if [ -z "$check_issue_key" ]; then
+  echo "JIRA issue key not provided:" >&2
+  jq '.version // {}' /tmp/input >&2
+  exit 1
+fi
+echo "Searching from JIRA issue key: $check_issue_key"
 
 echo '[' >check
 
-while read jira_issue_key; do
-  response=$(curl -u ${jira_user_email}:${jira_user_token} \
-    -H 'Accept: application/json' \
-    -X GET \
-    --url https://${jira_account}.atlassian.net/rest/servicedeskapi/request/${jira_issue_key})
+response=$(curl -u ${jira_user_email}:${jira_user_token} \
+  -H 'Accept: application/json' \
+  -X GET \
+  --url https://${jira_account}.atlassian.net/rest/servicedeskapi/request)
 
-  currentStatus=$(echo $response | jq '.currentStatus.status')
+for row in $(echo "${response}" | jq -r '.values[] | @base64'); do
+  _jq() {
+    echo ${row} | base64 --decode | jq -r ${1}
+  }
+  jira_issue_key=$(_jq '.issueKey')
 
-  if [ $(echo $currentStatus | grep -i approved | wc -l) -gt 0 ]; then
-    echo "JIRA issue ${jira_issue_key} has been approved !" >&2
-    jq --null-input --arg issueKey "$jira_issue_key" '{ "issueKey": $issueKey }' >>check
+  if [[ $jira_issue_key == $check_issue_key || $jira_issue_key > $check_issue_key ]]; then
+    if [[ $org == $(_jq '.requestFieldValues.customfield_10066') && $project == $(_jq '.requestFieldValues.customfield_10067') && $env == $(_jq '.requestFieldValues.customfield_10068') ]]; then
+      jq --null-input --arg issueKey "$jira_issue_key" '{ "issueKey": $issueKey }' >>check
+    fi
   fi
-done < jiraIssueKeys
+done
 
 echo ']' >>check
 cat check >&3
