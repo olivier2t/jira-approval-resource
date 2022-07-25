@@ -48,14 +48,14 @@ if [ -z "$issue_key" ]; then
   jq '.version // {}' /tmp/input >&2
   exit 1
 fi
-# jira_issue_key = $(echo $issue_key | cut -d ":" -f 1)
 
-# TODO check if 404 before sending the result
+# TODO check if 404 (or other error codes) before sending the result
 response=$(curl -u ${jira_user_email}:${jira_user_token} \
   -H 'Accept: application/json' \
   -X GET \
   --url https://${jira_account}.atlassian.net/rest/servicedeskapi/request/${issue_key})
   
 currentStatus=$(echo ${response} | jq '.currentStatus.status')
+issueUrl=$(echo $response | jq '._links.web')
 
-jq --null-input --arg issueKey "$issueKey" --arg currentStatus "$currentStatus" '{ "version": { "issueKey": $issueKey }, "metadata": [ {"name": "status","value": $currentStatus} ] }' >&3
+jq --null-input --arg issueKey "$issueKey" --arg currentStatus "$currentStatus" --arg issueUrl "$issueUrl" '{ "version": { "issueKey": $issueKey }, "metadata": [ {"name": "Status","value": $currentStatus}, {"name": "URL","value": $issueUrl} ] }' >&3
