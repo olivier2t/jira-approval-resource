@@ -54,7 +54,8 @@ response=$(curl -u ${jira_user_email}:${jira_user_token} \
   -H 'Accept: application/json' \
   -X GET \
   --url https://${jira_account}.atlassian.net/rest/servicedeskapi/request/${issue_key})
-  
+echo "JIRA response: $response"
+
 currentStatus=$(echo ${response} | jq '.currentStatus.status')
 issueUrl=$(echo $response | jq '._links.web')
 
