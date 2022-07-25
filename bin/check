@@ -54,17 +54,17 @@ fi
 
 echo '[' >check
 
-while read jiraIssueKey; do
+while read jira_issue_key; do
   response=$(curl -u ${jira_user_email}:${jira_user_token} \
     -H 'Accept: application/json' \
     -X GET \
-    --url https://${jira_account}.atlassian.net/rest/servicedeskapi/request/${jiraIssueKey})
+    --url https://${jira_account}.atlassian.net/rest/servicedeskapi/request/${jira_issue_key})
 
   currentStatus=$(echo $response | jq '.currentStatus.status')
 
   if [ $(echo $currentStatus | grep -i approved | wc -l) -gt 0 ]; then
-    echo "JIRA issue ${jiraIssueKey} has been approved !" >&2
-    jq --null-input --arg issueKey "$jiraIssueKey" '{ "issueKey": $issueKey }' >>check
+    echo "JIRA issue ${jira_issue_key} has been approved !" >&2
+    jq --null-input --arg issueKey "$jira_issue_key" '{ "issueKey": $issueKey }' >>check
   fi
 done < jiraIssueKeys
 

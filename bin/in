@@ -42,21 +42,22 @@ if [ -z "$jira_user_token" ]; then
   exit 1
 fi
 
-issue_key=$(jq -r '.version.issueKey // empty' /tmp/input)
-if [ -z "$issue_key" ]; then
+jira_issue_key=$(jq -r '.version.issueKey // empty' /tmp/input)
+if [ -z "$jira_issue_key" ]; then
   echo "JIRA issue key not provided:" >&2
   jq '.version // {}' /tmp/input >&2
   exit 1
 fi
+echo "Using JIRA issue key: $jira_issue_key"
 
 # TODO check if 404 (or other error codes) before sending the result
 response=$(curl -u ${jira_user_email}:${jira_user_token} \
   -H 'Accept: application/json' \
   -X GET \
-  --url https://${jira_account}.atlassian.net/rest/servicedeskapi/request/${issue_key})
+  --url https://${jira_account}.atlassian.net/rest/servicedeskapi/request/${jira_issue_key})
 echo "JIRA response: $response"
 
-currentStatus=$(echo ${response} | jq '.currentStatus.status')
-issueUrl=$(echo $response | jq '._links.web')
+jira_current_status=$(echo ${response} | jq '.currentStatus.status')
+jira_issue_url=$(echo $response | jq '._links.web')
 
-jq --null-input --arg issueKey "$issueKey" --arg currentStatus "$currentStatus" --arg issueUrl "$issueUrl" '{ "version": { "issueKey": $issueKey }, "metadata": [ {"name": "Status","value": $currentStatus}, {"name": "URL","value": $issueUrl} ] }' >&3
+jq --null-input --arg issueKey "$jira_issue_key" --arg currentStatus "$jira_current_status" --arg issueUrl "$jira_issue_url" '{ "version": { "issueKey": $issueKey }, "metadata": [ {"name": "Status","value": $currentStatus}, {"name": "URL","value": $issueUrl} ] }' >&3
