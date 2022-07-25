@@ -81,7 +81,7 @@ response=$(curl -u ${jira_user_email}:${jira_user_token} \
   --url https://${jira_account}.atlassian.net/rest/servicedeskapi/request)
 echo "JIRA response: $response"
 
-jira_issue_key=$(echo $response | jq '.issueKey')
+jira_issue_key=$(echo $response | jq '.issueKey' | sed -e 's/"//g')
 jira_current_status=$(echo ${response} | jq '.currentStatus.status')
 jira_issue_url=$(echo $response | jq '._links.web')
 
