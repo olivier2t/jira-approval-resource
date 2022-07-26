@@ -75,18 +75,21 @@ response=$(curl -u ${jira_user_email}:${jira_user_token} \
   --url https://${jira_account}.atlassian.net/rest/servicedeskapi/request)
 
 for row in $(echo "${response}" | jq -r '.values[] | @base64'); do
-  _jq() {
-    echo ${row} | base64 -d | jq -r ${1}
-  }
-  response=$(_jq '.')
+  # _jq() {
+  #   echo ${row} | base64 -d | jq -r ${1}
+  # }
+  response=$(echo $row | base64 -d | jq -r '.')
+  echo $response
   jira_issue_key=$(echo $response | jq -r '.issueKey' | sed -e 's/"//g')
+  echo $jira_issue_key
   # jira_current_status=$(echo ${response} | jq '.currentStatus.status')
 
   # if [[ -z $check_issue_key || $jira_issue_key == $check_issue_key || $jira_issue_key > $check_issue_key ]]; then
     # if [[ $org == $(_jq '.requestFieldValues.customfield_10066') && $project == $(_jq '.requestFieldValues.customfield_10067') && $env == $(_jq '.requestFieldValues.customfield_10068') ]]; then
       jq --null-input --compact-output --arg issueKey "$jira_issue_key" '{ "issueKey": $issueKey }' >>/opt/resource/check
       echo -n ',' >>/opt/resource/check
-      echo $jira_issue_key
+      echo '---------cat check-----------'
+      cat /opt/resource/check
     # fi
   # fi
 done
