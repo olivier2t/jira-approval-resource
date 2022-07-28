@@ -64,10 +64,9 @@ if [ -z "$env" ]; then
 fi
 echo "Using Cycloid env: $env"
 
-check_issue_key=$(jq -r '.version.ref // empty' /tmp/input | sed -e 's/"//g')
-echo "Searching from JIRA issue key: $check_issue_key"
-
 echo '[' >check
+jq --null-input --compact-output --arg issueKey "IP-90" --arg issueStatus "approved" --arg issueUrl "https://localhost"'{ "ref": $issueKey, "status": $issueStatus, "URL": $issueUrl }' >>check
+echo -n ',' >>check
 
 response=$(curl -u ${jira_user_email}:${jira_user_token} \
   -H 'Accept: application/json' \
@@ -83,12 +82,10 @@ for row_base64 in $(echo "${response}" | jq -r '.values[] | @base64'); do
   jira_current_status=$(echo ${row} | jq '.currentStatus.status')
   jira_issue_url=$(echo $response | jq '._links.web')
 
-  if [[ -z $check_issue_key || $jira_issue_key == $check_issue_key || $jira_issue_key > $check_issue_key ]]; then
-    if [[ $org == $(_jq '.requestFieldValues.customfield_10066') && $project == $(_jq '.requestFieldValues.customfield_10067') && $env == $(_jq '.requestFieldValues.customfield_10068') ]]; then
-      jq --null-input --compact-output --arg issueKey "$jira_issue_key" --arg issueStatus "$jira_current_status" --arg issueUrl "$jira_issue_url"'{ "ref": $issueKey, "status": $issueStatus, "URL": $issueUrl }' >>check
-      echo -n ',' >>check
-    fi
-  fi
+  # if [[ $org == $(_jq '.requestFieldValues.customfield_10066') && $project == $(_jq '.requestFieldValues.customfield_10067') && $env == $(_jq '.requestFieldValues.customfield_10068') ]]; then
+    jq --null-input --compact-output --arg issueKey "$jira_issue_key" --arg issueStatus "$jira_current_status" --arg issueUrl "$jira_issue_url"'{ "ref": $issueKey, "status": $issueStatus, "URL": $issueUrl }' >>check
+    echo -n ',' >>check
+  # fi
 done
 
 # Remove the last comma at the end of the JSON file if there was at least one entry

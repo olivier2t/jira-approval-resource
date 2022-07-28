@@ -82,10 +82,10 @@ echo "JIRA response: $response"
 jira_current_status=$(echo ${response} | jq '.currentStatus.status')
 jira_issue_url=$(echo $response | jq '._links.web')
 
-if [[ $org == $(echo ${response} | jq '.requestFieldValues.customfield_10066') && $project == $(echo ${response} | jq '.requestFieldValues.customfield_10067') && $env == $(echo ${response} | jq '.requestFieldValues.customfield_10068') && $(echo $jira_current_status | grep -i approved | wc -l) > 0 ]]; then
+# if [[ $org == $(echo ${response} | jq '.requestFieldValues.customfield_10066') && $project == $(echo ${response} | jq '.requestFieldValues.customfield_10067') && $env == $(echo ${response} | jq '.requestFieldValues.customfield_10068') && $(echo $jira_current_status | grep -i approved | wc -l) > 0 ]]; then
   echo "JIRA issue ${check_issue_key} has been approved !" >&2
   jq --null-input --arg issueKey "$check_issue_key" --arg currentStatus "$jira_current_status" --arg issueUrl "$jira_issue_url" '{ "version": { "ref": $issueKey }, "metadata": [ {"name": "Status","value": $currentStatus}, {"name": "URL","value": $issueUrl} ] }' >&3
   exit 0
-fi
+# fi
 
 echo '{ "version": {} }' >&3
