@@ -103,7 +103,7 @@ for row_response in $(echo "${response}" | jq -r '.values[] | @base64'); do
 done
 
 # Remove the last comma at the end of the JSON file if there was at least one entry
-sed -i '$ s/,$//' check
+# sed -i '$ s/,$//' check
 
 echo ']' >>check
 cat check >&3
