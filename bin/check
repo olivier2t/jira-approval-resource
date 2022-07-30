@@ -65,7 +65,6 @@ fi
 echo "Using Cycloid env: $env"
 
 echo '[' >check
-echo '{ "ref": "IP-95" },' >>check
 
 response=$(curl -u ${jira_user_email}:${jira_user_token} \
   -H 'Accept: application/json' \
@@ -106,5 +105,5 @@ sed -i '$ s/,$//' check
 # Remove the line feeds
 sed -i ':a;N;$!ba;s/\n//g' check
 
-# echo ']' >>check
+echo ']' >>check
 cat check >&3
