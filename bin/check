@@ -114,6 +114,6 @@ sed -i '$ s/,$//' check
 # Remove the line feeds
 sed -i ':a;N;$!ba;s/\n//g' check
 
-echo ']' >>check
+# echo ']' >>check
 cat check
 cat check >&3
