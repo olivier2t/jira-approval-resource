@@ -85,7 +85,7 @@ for row_response in $(echo "${response}" | jq -r '.values[] | @base64'); do
   org_match=0
   project_match=0
   env_match=0
-  for row_requestFieldValues in $(_jq $row '.requestFieldValues[] | @base64'); do
+  for row_requestFieldValues in $(echo "${row}" | jq -r '.requestFieldValues[] | @base64'); do
 echo "=====row_requestFieldValues=====" >>check
 echo $row_requestFieldValues >>check
     if [[ $(_jq $row_requestFieldValues '.label') == "org" && $(_jq $row_requestFieldValues '.value') == $org ]]; then
