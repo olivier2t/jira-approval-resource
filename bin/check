@@ -77,8 +77,8 @@ for row_response in $(echo "${response}" | jq -r '.values[] | @base64'); do
     echo $1 | base64 -d | jq -r $2
   }
   row=$(_jq $row_response '.')
-  echo $row
-  echo "---"
+  echo $row >>check
+  echo "---" >>check
   jira_issue_key=$(_jq $row_response '.issueKey' | sed -e 's/"//g')
   jira_current_status=$(_jq $row_response '.currentStatus.status')
 
@@ -90,20 +90,20 @@ echo "=====row_requestFieldValues====="
 echo $row_requestFieldValues
     if [[ $(_jq $row_requestFieldValues '.label') == "org" && $(_jq $row_requestFieldValues '.value') == $org ]]; then
       org_match=1
-      echo org_match
+      echo org_match >>check
     fi
     if [[ $(_jq $row_requestFieldValues '.label') == "project" && $(_jq $row_requestFieldValues '.value') == $project ]]; then
       project_match=1
-      echo project_match
+      echo project_match >>check
     fi
     if [[ $(_jq $row_requestFieldValues '.label') == "env" && $(_jq $row_requestFieldValues '.value') == $env ]]; then
       env_match=1
-      echo env_match
+      echo env_match >>check
     fi
   done
 
   if [[ $org_match -eq 1 && $project_match -eq 1 && $env_match -eq 1 && $(echo $jira_current_status | grep -i approved | wc -l) -gt 0 ]]; then
-  echo "adding  $jira_issue_key"
+  echo "adding  $jira_issue_key" >>check
     jq --null-input --compact-output --arg issueKey "$jira_issue_key" '{ "ref": "'$issueKey'" }' >>check
     echo -n ',' >>check
   fi
@@ -115,5 +115,4 @@ sed -i '$ s/,$//' check
 sed -i ':a;N;$!ba;s/\n//g' check
 
 # echo ']' >>check
-cat check
 cat check >&3
